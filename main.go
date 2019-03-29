@@ -1,8 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"strings"
 
 	"github.com/rverton/webanalyze"
@@ -21,6 +23,31 @@ func analyze(url string) (tools []string, err error) {
 	return
 }
 
+func handler(rw http.ResponseWriter, req *http.Request) {
+	body := struct {
+		Url string `json:"url"`
+	}{}
+
+	err := json.NewDecoder(req.Body).Decode(&body)
+	if err != nil {
+		panic(err)
+	}
+
+	tools, err := analyze(body.Url)
+	if err != nil {
+		panic(err)
+	}
+
+	output := struct {
+		Tools []string `json:"tools"`
+	}{
+		tools,
+	}
+
+	json.NewEncoder(rw).Encode(output)
+}
+
 func main() {
-	fmt.Println(analyze("https://github.com"))
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe(":3001", nil))
 }
