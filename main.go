@@ -3,20 +3,24 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
 
 	"github.com/rverton/webanalyze"
 )
 
-func main() {
-	file := ioutil.NopCloser(strings.NewReader("https://github.com"))
+func analyze(url string) (tools []string, err error) {
+	file := ioutil.NopCloser(strings.NewReader(url))
 	results, err := webanalyze.Init(4, file, "apps.json")
-	if err != nil {
-		log.Fatal("error initializing:", err)
-	}
 
 	for result := range results {
-		fmt.Println(result)
+		for _, a := range result.Matches {
+			tools = append(tools, a.AppName)
+		}
 	}
+
+	return
+}
+
+func main() {
+	fmt.Println(analyze("https://github.com"))
 }
