@@ -47,6 +47,13 @@ func handler(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(output)
 }
 
+func init() {
+	err := webanalyze.DownloadFile(webanalyze.WappalyzerURL, "apps.json")
+	if err != nil {
+		log.Fatalf("error: can not update apps file: %v", err)
+	}
+}
+
 func main() {
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(":3001", nil))
