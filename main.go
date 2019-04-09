@@ -34,6 +34,7 @@ func handler(rw http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
+	log.Println("Analyzing", body.Url)
 	tools, err := analyze(body.Url)
 	if err != nil {
 		panic(err)
