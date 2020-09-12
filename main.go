@@ -2,24 +2,23 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/rverton/webanalyze"
 )
 
 func analyze(url string) (tools []string, err error) {
-	file := ioutil.NopCloser(strings.NewReader(url))
-	results, err := webanalyze.Init(4, file, "apps.json")
+  appsFile, _ := os.Open("apps.json")
+  wa, _ := webanalyze.NewWebAnalyzer(appsFile, nil)
 
-	for result := range results {
-		for _, a := range result.Matches {
-			tools = append(tools, a.AppName)
-		}
-	}
+  job := webanalyze.NewOnlineJob(url, "", nil, 0, false)
+  result, _ := wa.Process(job)
+
+  for _, a := range result.Matches {
+    tools = append(tools, a.AppName)
+  }
 
 	return
 }
@@ -50,10 +49,12 @@ func handler(rw http.ResponseWriter, req *http.Request) {
 }
 
 func init() {
-	err := webanalyze.DownloadFile(webanalyze.WappalyzerURL, "apps.json")
-	if err != nil {
-		log.Fatalf("error: can not update apps file: %v", err)
-	}
+  err := webanalyze.DownloadFile(webanalyze.WappalyzerURL, "apps.json")
+  if err != nil {
+    log.Fatalf("error: can not update apps file: %v", err)
+  }
+
+  log.Println("app definition file updated from ", webanalyze.WappalyzerURL)
 }
 
 func main() {
