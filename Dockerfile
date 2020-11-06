@@ -12,7 +12,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
-FROM alpine:3.9.2 as runtime
+FROM alpine:3.12.1 as runtime
 
 WORKDIR /app
 
