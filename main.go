@@ -10,6 +10,12 @@ import (
 	"github.com/rverton/webanalyze"
 )
 
+var (
+	port        string
+	environment string
+	secret      string
+)
+
 func analyze(url string) (tools []string, err error) {
 	appsFile, _ := os.Open("apps.json")
 	wa, _ := webanalyze.NewWebAnalyzer(appsFile, nil)
@@ -26,12 +32,18 @@ func analyze(url string) (tools []string, err error) {
 
 func handler(rw http.ResponseWriter, req *http.Request) {
 	body := struct {
-		Url string `json:"url"`
+		Url    string `json:"url"`
+		Secret string `json:"secret"`
 	}{}
 
 	err := json.NewDecoder(req.Body).Decode(&body)
 	if err != nil {
 		panic(err)
+	}
+
+	if body.Secret == "" || body.Secret != secret {
+		http.Error(rw, "Forbidden: secret key is incorrect", http.StatusForbidden)
+		return
 	}
 
 	// append https before website if it doesn't exist
@@ -65,18 +77,22 @@ func init() {
 }
 
 func main() {
-	port := os.Getenv("PORT")
+	port = os.Getenv("PORT")
 	if port == "" {
 		port = "3001"
 	}
 
-	environment := os.Getenv("ENVIRONMENT")
+	environment = os.Getenv("ENVIRONMENT")
 	if environment == "" {
 		environment = "development"
 	}
 
-	http.HandleFunc("/", handler)
+	secret = os.Getenv("SECRET")
+	if secret == "" {
+		secret = "123anaLayloLayloLaylo"
+	}
 
+	http.HandleFunc("/", handler)
 	if environment == "production" {
 		log.Fatal(
 			http.ListenAndServeTLS(
