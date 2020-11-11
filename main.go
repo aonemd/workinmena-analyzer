@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/rverton/webanalyze"
 )
@@ -33,8 +34,14 @@ func handler(rw http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
+	// append https before website if it doesn't exist
+	url := body.Url
+	if !strings.HasPrefix(url, "http") {
+		url = "https://" + url
+	}
+
 	log.Println("Analyzing", body.Url)
-	tools, err := analyze(body.Url)
+	tools, err := analyze(url)
 	if err != nil {
 		panic(err)
 	}
