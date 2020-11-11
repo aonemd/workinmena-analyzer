@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . .
 
-ENV mode production
+ENV ENVIRONMENT production
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
 FROM alpine:3.12.1 as runtime

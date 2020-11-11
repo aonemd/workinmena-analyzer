@@ -70,14 +70,14 @@ func main() {
 		port = "3001"
 	}
 
-	mode := os.Getenv("mode")
-	if mode == "" {
-		mode = "development"
+	environment := os.Getenv("ENVIRONMENT")
+	if environment == "" {
+		environment = "development"
 	}
 
 	http.HandleFunc("/", handler)
 
-	if mode == "production" {
+	if environment == "production" {
 		log.Fatal(
 			http.ListenAndServeTLS(
 				":"+port,
