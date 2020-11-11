@@ -92,7 +92,7 @@ func main() {
 		secret = "123anaLayloLayloLaylo"
 	}
 
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/analyzer", handler)
 	if environment == "production" {
 		log.Fatal(
 			http.ListenAndServeTLS(
