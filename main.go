@@ -16,18 +16,44 @@ var (
 	secret      string
 )
 
-func analyze(url string) (tools []string, err error) {
-	appsFile, _ := os.Open("technologies.json")
-	wa, _ := webanalyze.NewWebAnalyzer(appsFile, nil)
-
-	job := webanalyze.NewOnlineJob(url, "", nil, 0, true, false)
-	result, _ := wa.Process(job)
-
-	for _, a := range result.Matches {
-		tools = append(tools, a.AppName)
+func init() {
+	err := webanalyze.DownloadFile(webanalyze.WappalyzerURL, "technologies.json")
+	if err != nil {
+		log.Fatalf("error: can not update technologies file: %v", err)
 	}
 
-	return
+	log.Println("app definition file updated from ", webanalyze.WappalyzerURL)
+}
+
+func main() {
+	port = os.Getenv("PORT")
+	if port == "" {
+		port = "3001"
+	}
+
+	environment = os.Getenv("ENVIRONMENT")
+	if environment == "" {
+		environment = "development"
+	}
+
+	secret = os.Getenv("SECRET")
+	if secret == "" {
+		secret = "123anaLayloLayloLaylo"
+	}
+
+	http.HandleFunc("/analyzer", handler)
+	if environment == "production" {
+		log.Fatal(
+			http.ListenAndServeTLS(
+				":"+port,
+				"/etc/letsencrypt/live/workinmena.tech/fullchain.pem",
+				"/etc/letsencrypt/live/workinmena.tech/privkey.pem",
+				nil,
+			),
+		)
+	} else {
+		log.Fatal(http.ListenAndServe(":"+port, nil))
+	}
 }
 
 func handler(rw http.ResponseWriter, req *http.Request) {
@@ -71,42 +97,16 @@ func handler(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(output)
 }
 
-func init() {
-	err := webanalyze.DownloadFile(webanalyze.WappalyzerURL, "technologies.json")
-	if err != nil {
-		log.Fatalf("error: can not update technologies file: %v", err)
+func analyze(url string) (tools []string, err error) {
+	appsFile, _ := os.Open("technologies.json")
+	wa, _ := webanalyze.NewWebAnalyzer(appsFile, nil)
+
+	job := webanalyze.NewOnlineJob(url, "", nil, 0, true, false)
+	result, _ := wa.Process(job)
+
+	for _, a := range result.Matches {
+		tools = append(tools, a.AppName)
 	}
 
-	log.Println("app definition file updated from ", webanalyze.WappalyzerURL)
-}
-
-func main() {
-	port = os.Getenv("PORT")
-	if port == "" {
-		port = "3001"
-	}
-
-	environment = os.Getenv("ENVIRONMENT")
-	if environment == "" {
-		environment = "development"
-	}
-
-	secret = os.Getenv("SECRET")
-	if secret == "" {
-		secret = "123anaLayloLayloLaylo"
-	}
-
-	http.HandleFunc("/analyzer", handler)
-	if environment == "production" {
-		log.Fatal(
-			http.ListenAndServeTLS(
-				":"+port,
-				"/etc/letsencrypt/live/workinmena.tech/fullchain.pem",
-				"/etc/letsencrypt/live/workinmena.tech/privkey.pem",
-				nil,
-			),
-		)
-	} else {
-		log.Fatal(http.ListenAndServe(":"+port, nil))
-	}
+	return
 }
