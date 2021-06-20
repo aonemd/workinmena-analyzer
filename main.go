@@ -20,7 +20,7 @@ func analyze(url string) (tools []string, err error) {
 	appsFile, _ := os.Open("technologies.json")
 	wa, _ := webanalyze.NewWebAnalyzer(appsFile, nil)
 
-	job := webanalyze.NewOnlineJob(url, "", nil, 0, false)
+	job := webanalyze.NewOnlineJob(url, "", nil, 0, true, false)
 	result, _ := wa.Process(job)
 
 	for _, a := range result.Matches {
