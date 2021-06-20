@@ -17,7 +17,7 @@ var (
 )
 
 func analyze(url string) (tools []string, err error) {
-	appsFile, _ := os.Open("apps.json")
+	appsFile, _ := os.Open("technologies.json")
 	wa, _ := webanalyze.NewWebAnalyzer(appsFile, nil)
 
 	job := webanalyze.NewOnlineJob(url, "", nil, 0, false)
@@ -68,9 +68,9 @@ func handler(rw http.ResponseWriter, req *http.Request) {
 }
 
 func init() {
-	err := webanalyze.DownloadFile(webanalyze.WappalyzerURL, "apps.json")
+	err := webanalyze.DownloadFile(webanalyze.WappalyzerURL, "technologies.json")
 	if err != nil {
-		log.Fatalf("error: can not update apps file: %v", err)
+		log.Fatalf("error: can not update technologies file: %v", err)
 	}
 
 	log.Println("app definition file updated from ", webanalyze.WappalyzerURL)
