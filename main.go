@@ -49,7 +49,11 @@ func handler(rw http.ResponseWriter, req *http.Request) {
 	// append https before website if it doesn't exist
 	url := body.Url
 	if !strings.HasPrefix(url, "http") {
-		url = "https://" + url
+		if strings.Contains(url, "www") {
+			url = "https://" + url
+		} else {
+			url = "https://www." + url
+		}
 	}
 
 	log.Println("Analyzing", body.Url)
